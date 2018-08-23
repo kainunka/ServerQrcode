@@ -1,11 +1,12 @@
 <?
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 // ================ Connect to server =================
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "qrcode";
 $conn = new mysqli($servername, $username, $password, $dbname);
+mysqli_set_charset($conn, "utf8");
 // ====================================================
 $data = array(
     "result" => 0
@@ -16,10 +17,11 @@ $request_array = array("add", "edit", "remove");
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
     if ($_POST['request'] == "add") {
-        if (isset($_POST['username']) && $_POST['username'] != "" && isset($_POST['password']) && $_POST['password'] != "" && isset($_POST['type']) && in_array($_POST['type'], $type_array)) {
+        if (isset($_POST['username']) && $_POST['username'] != "" && isset($_POST['password']) && $_POST['password'] != "" && isset($_POST['name']) && $_POST['name'] != "" && isset($_POST['type']) && in_array($_POST['type'], $type_array)) {
             $post_username = $_POST['username'];
             $post_password = $_POST['password'];
             $post_type = $_POST['type'];
+            $post_name = $_POST['name'];
         
             if ($conn->connect_error) {
                 $data = array(
@@ -39,14 +41,15 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 );
                 echo json_encode($data);
             } else {
-                $sql = "INSERT INTO users (username, password, type)
-                VALUES ('$post_username', '$post_password', '$post_type')";
+                $sql = "INSERT INTO users (username, password, name, type)
+                VALUES ('$post_username', '$post_password', '$post_name', '$post_type')";
 
                 if ($conn->query($sql) === TRUE) {
                     $last_id = $conn->insert_id;
                     $data = array(
                         "result" => 1,
                         "username" => $post_username,
+                        "name" => $post_name,
                         "type" => $post_type,
                         "user_id" => $last_id
                     );
