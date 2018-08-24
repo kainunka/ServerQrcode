@@ -12,7 +12,7 @@ $data = array(
     "result" => 0
 );
 $type_array = array("teacher", "student");
-$request_array = array("add", "edit", "remove");
+$request_array = array("add", "edit", "remove", "get");
 //
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
@@ -70,9 +70,100 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             echo json_encode($data);
         }
     } else if ($_POST['request'] == "edit") {
+        if (isset($_POST['user_id']) && $_POST['user_id'] != "" && isset($_POST['name']) && $_POST['name'] != "") {
+            $post_user_id = $_POST['user_id'];
+            $post_name = $_POST['name'];
 
+            $sql = "SELECT user_id FROM users WHERE user_id = '$post_user_id'";
+            $select = $conn->query($sql);
+            if ($select->num_rows > 0) {
+                $sql = "UPDATE users SET name='$post_name' WHERE user_id='$post_user_id'";
+
+                if ($conn->query($sql) === TRUE) {
+                    $data = array(
+                        "result" => 1,
+                        "user_id" => $post_user_id,
+                        "name" => $post_name
+                    );
+                    echo json_encode($data);
+                } else {
+                    $data = array(
+                        "result" => 0,
+                        "message" => "Insert data error"
+                    );
+                    echo json_encode($data);
+                }
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "Id user invalid"
+                );
+                echo json_encode($data);
+            }
+
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
     } else if ($_POST['request'] == "remove") {
+        if (isset($_POST['user_id']) && $_POST['user_id'] != "") {
+            $post_user_id = $_POST['user_id'];
+            $sql = "SELECT user_id FROM users WHERE user_id = '$post_user_id'";
+            $select = $conn->query($sql);
 
+            if ($select->num_rows > 0) {
+                $sql = "DELETE FROM users WHERE user_id='$post_user_id'";
+                if ($conn->query($sql) === TRUE) {
+                    $data = array(
+                        "result" => 1,
+                        "status" => "success",
+                    );
+                    echo json_encode($data);
+                } else {
+                    $data = array(
+                        "result" => 0,
+                        "message" => "delete error",
+                    );
+                    echo json_encode($data);
+                }
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "Id user invalid"
+                );
+                echo json_encode($data);
+            }
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
+    } else if ($_POST['request'] == "get") {
+
+        $sql = "SELECT * FROM users";
+        $select = $conn->query($sql);
+        
+        if ($select->num_rows > 0) {
+            $data = array();
+            while($row = $select->fetch_assoc()) {
+                $data[] = $row;
+            }
+            echo json_encode(array(
+                "result" => 1,
+                "data" => $data
+            ));
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "select error",
+            );
+            echo json_encode($data);
+        }
     } else {
         $data = array(
             "result" => 0,
