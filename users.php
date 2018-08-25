@@ -2,10 +2,17 @@
 header('Access-Control-Allow-Origin: *'); 
 header('Content-Type: application/json; charset=utf-8');
 // ================ Connect to server =================
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "qrcode";
+
+// user server
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "qrcode";
+$username = "id6911739_qrcodeapp";
+$password = "123456789";
+$dbname = "id6911739_qrcode";
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 mysqli_set_charset($conn, "utf8");
 // ====================================================
@@ -13,7 +20,7 @@ $data = array(
     "result" => 0
 );
 $type_array = array("teacher", "student", "admin");
-$request_array = array("add", "edit", "remove", "get", "get_id");
+$request_array = array("add", "edit", "remove", "get", "get_id", "check_login");
 //
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
@@ -188,6 +195,37 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 echo json_encode($data);
             }
 
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
+    }  else if ($_POST['request'] == "check_login") {
+        if (isset($_POST['username']) && $_POST['username'] != "" && isset($_POST['password']) && $_POST['password'] != "") {
+            $post_username = $_POST['username'];
+            $post_password = $_POST['password'];
+            $sql = "SELECT * FROM users WHERE username = '$post_username' and password = '$post_password'";
+            $select = $conn->query($sql);
+    
+            if ($select->num_rows > 0) {
+                $data = array();
+                $row = $select->fetch_assoc();
+                $data = array(
+                    "result" => 1,
+                    "user_id" => $row['user_id'],
+                    "name" => $row['name'],
+                    "type" => $row['type']
+                );
+                echo json_encode($data);
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "Username or password Invalid"
+                );
+                echo json_encode($data);
+            }
         } else {
             $data = array(
                 "result" => 0,

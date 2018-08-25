@@ -2,25 +2,33 @@
 header('Access-Control-Allow-Origin: *'); 
 header('Content-Type: application/json; charset=utf-8');
 // ================ Connect to server =================
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "qrcode";
+
+// user server
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "qrcode";
+$username = "id6911739_qrcodeapp";
+$password = "123456789";
+$dbname = "id6911739_qrcode";
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 mysqli_set_charset($conn, "utf8");
 // ====================================================
 $data = array(
     "result" => 0
 );
-$request_array = array("add", "edit", "remove", "get", "get_id");
+$request_array = array("add", "edit", "remove", "get", "get_id", "get_id_room");
 //
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
     if ($_POST['request'] == "add") {
-        if (isset($_POST['room_id']) && $_POST['room_id'] != "" && isset($_POST['name']) && $_POST['name'] != "" && isset($_POST['qrcode']) && $_POST['qrcode'] != "") {
+        if (isset($_POST['room_id']) && $_POST['room_id'] != "" && isset($_POST['name']) && $_POST['name'] != "" && isset($_POST['start_time']) && $_POST['start_time'] != "" && isset($_POST['end_time']) && $_POST['end_time'] != "") {
             $post_room_id = $_POST['room_id'];
             $post_name = $_POST['name'];
-            $post_qrcode = $_POST['qrcode'];
+            $post_start_time = $_POST['start_time'];
+            $post_end_time = $_POST['end_time'];
         
             if ($conn->connect_error) {
                 $data = array(
@@ -29,8 +37,8 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 );
                 echo json_encode($data);
             }          
-            $sql = "INSERT INTO course (room_id, name, qrcode)
-            VALUES ('$post_room_id', '$post_name', '$post_qrcode')";
+            $sql = "INSERT INTO course (room_id, name, start_time, end_time)
+            VALUES ('$post_room_id', '$post_name', '$post_start_time', '$post_end_time')";
 
             if ($conn->query($sql) === TRUE) {
                 $last_id = $conn->insert_id;
@@ -39,8 +47,9 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                     "course_id" => $last_id,
                     "room_id" => $post_room_id,
                     "name" => $post_name,
-                    "qrcode" => $post_qrcode
-                );
+                    "start_time" => $post_start_time,
+                    "end_time" => $post_end_time
+                ); 
                 echo json_encode($data);
             } else {
                 $data = array(
@@ -171,6 +180,35 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 $data = array(
                     "result" => 0,
                     "message" => "Id course invalid"
+                );
+                echo json_encode($data);
+            }
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
+    } else if ($_POST['request'] == "get_id_room") {
+        if (isset($_POST['room_id']) && $_POST['room_id'] != "") {
+            $post_room_id = $_POST['room_id'];
+            $sql = "SELECT * FROM course WHERE room_id = '$post_room_id'";
+            $select = $conn->query($sql);
+
+            if ($select->num_rows > 0) {
+                $data = array();
+                while($row = $select->fetch_assoc()) {
+                    $data[] = $row;
+                }
+                echo json_encode(array(
+                    "result" => 1,
+                    "data" => $data
+                ));
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "Id room course invalid"
                 );
                 echo json_encode($data);
             }

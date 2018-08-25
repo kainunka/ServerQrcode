@@ -2,17 +2,24 @@
 header('Access-Control-Allow-Origin: *'); 
 header('Content-Type: application/json; charset=utf-8');
 // ================ Connect to server =================
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "qrcode";
+
+// user server
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "qrcode";
+$username = "id6911739_qrcodeapp";
+$password = "123456789";
+$dbname = "id6911739_qrcode";
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 mysqli_set_charset($conn, "utf8");
 // ====================================================
 $data = array(
     "result" => 0
 );
-$request_array = array("add", "remove", "get", "get_id");
+$request_array = array("add", "remove", "get", "get_id", "course_add", "get_user");
 //
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
@@ -63,7 +70,7 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             $select = $conn->query($sql);
 
             if ($select->num_rows > 0) {
-                $sql = "DELETE FROM join_id WHERE join_id='$post_join_id'";
+                $sql = "DELETE FROM join_room WHERE join_id='$post_join_id'";
                 if ($conn->query($sql) === TRUE) {
                     $data = array(
                         "result" => 1,
@@ -132,6 +139,84 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 $data = array(
                     "result" => 0,
                     "message" => "Id join room invalid"
+                );
+                echo json_encode($data);
+            }
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
+    } else if ($_POST['request'] == "get_user") {
+        if (isset($_POST['user_id']) && $_POST['user_id'] != "") {
+            $post_user_id = $_POST['user_id'];
+            $sql = "SELECT * FROM join_room WHERE user_id = '$post_user_id'";
+            $select = $conn->query($sql);
+            
+            if ($select->num_rows > 0) {
+                $data = array();
+                while($row = $select->fetch_assoc()) {
+                    $data[] = $row;
+                }
+                echo json_encode(array(
+                    "result" => 1,
+                    "data" => $data
+                ));
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "select error",
+                );
+                echo json_encode($data);
+            }
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
+    } else if ($_POST['request'] == "course_add") {
+        if (isset($_POST['course_id']) && $_POST['course_id'] != "" && isset($_POST['user_id']) && $_POST['user_id'] != "" && isset($_POST['time']) && $_POST['time'] != "") {
+            $post_course_id = $_POST['course_id'];
+            $post_user_id = $_POST['user_id'];
+            $post_time = $_POST['time'];
+
+            $sql = "SELECT * FROM course WHERE course_id = '$post_course_id'";
+            $select = $conn->query($sql);
+            if ($select->num_rows > 0) {
+                $row = $select->fetch_assoc();
+
+                $sql_insert = "INSERT INTO join_room (course_id, user_id, time, name, start_time, end_time)
+                VALUES ('$post_course_id', '$post_user_id', '$post_time', '".$row['name']."', '".$row['start_time']."', '".$row['end_time']."')";
+
+                if ($conn->query($sql_insert) === TRUE) {
+                    $last_id = $conn->insert_id;
+                   
+                    $data = array(
+                        "result" => 1,
+                        "join_id" => $last_id,
+                        "course_id" => $post_course_id,
+                        "user_id" => $post_user_id,
+                        "time" => $post_time,
+                        "name" => $row['name'],
+                        "start_time" => $row['start_time'],
+                        "end_time" => $row['end_time']
+                    );
+                    echo json_encode($data);
+                } else {
+                    $data = array(
+                        "result" => 0,
+                        "message" => "Insert error"
+                    );
+                    echo json_encode($data);
+                }
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "Id course invalid"
                 );
                 echo json_encode($data);
             }

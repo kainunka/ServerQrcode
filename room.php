@@ -2,10 +2,18 @@
 header('Access-Control-Allow-Origin: *'); 
 header('Content-Type: application/json; charset=utf-8');
 // ================ Connect to server =================
+
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "qrcode";
+
+// user server
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "qrcode";
+$username = "id6911739_qrcodeapp";
+$password = "123456789";
+$dbname = "id6911739_qrcode";
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 mysqli_set_charset($conn, "utf8");
 // ====================================================
@@ -28,7 +36,7 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 echo json_encode($data);
             } 
 
-            $sql = "INSERT INTO room (username)
+            $sql = "INSERT INTO room (name)
             VALUES ('$post_name')";
 
             if ($conn->query($sql) === TRUE) {
