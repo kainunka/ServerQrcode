@@ -12,16 +12,12 @@ mysqli_set_charset($conn, "utf8");
 $data = array(
     "result" => 0
 );
-$type_array = array("teacher", "student", "admin");
 $request_array = array("add", "edit", "remove", "get", "get_id");
 //
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
     if ($_POST['request'] == "add") {
-        if (isset($_POST['username']) && $_POST['username'] != "" && isset($_POST['password']) && $_POST['password'] != "" && isset($_POST['name']) && $_POST['name'] != "" && isset($_POST['type']) && in_array($_POST['type'], $type_array)) {
-            $post_username = $_POST['username'];
-            $post_password = $_POST['password'];
-            $post_type = $_POST['type'];
+        if (isset($_POST['name']) && $_POST['name'] != "") {
             $post_name = $_POST['name'];
         
             if ($conn->connect_error) {
@@ -32,36 +28,23 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 echo json_encode($data);
             } 
 
-            $sql = "SELECT username FROM users WHERE username = '$post_username'";
-            $select = $conn->query($sql);
+            $sql = "INSERT INTO room (username)
+            VALUES ('$post_name')";
 
-            if ($select->num_rows > 0) {
+            if ($conn->query($sql) === TRUE) {
+                $last_id = $conn->insert_id;
                 $data = array(
-                    "result" => 0,
-                    "message" => "Username already exis"
+                    "result" => 1,
+                    "room_id" => $last_id,
+                    "name" => $post_name,
                 );
                 echo json_encode($data);
             } else {
-                $sql = "INSERT INTO users (username, password, name, type)
-                VALUES ('$post_username', '$post_password', '$post_name', '$post_type')";
-
-                if ($conn->query($sql) === TRUE) {
-                    $last_id = $conn->insert_id;
-                    $data = array(
-                        "result" => 1,
-                        "username" => $post_username,
-                        "name" => $post_name,
-                        "type" => $post_type,
-                        "user_id" => $last_id
-                    );
-                    echo json_encode($data);
-                } else {
-                    $data = array(
-                        "result" => 0,
-                        "message" => "Insert data error"
-                    );
-                    echo json_encode($data);
-                }
+                $data = array(
+                    "result" => 0,
+                    "message" => "Insert data error"
+                );
+                echo json_encode($data);
             }
         } else {
             $data = array(
@@ -71,19 +54,19 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             echo json_encode($data);
         }
     } else if ($_POST['request'] == "edit") {
-        if (isset($_POST['user_id']) && $_POST['user_id'] != "" && isset($_POST['name']) && $_POST['name'] != "") {
-            $post_user_id = $_POST['user_id'];
+        if (isset($_POST['room_id']) && $_POST['room_id'] != "" && isset($_POST['name']) && $_POST['name'] != "") {
+            $post_room_id = $_POST['room_id'];
             $post_name = $_POST['name'];
 
-            $sql = "SELECT user_id FROM users WHERE user_id = '$post_user_id'";
+            $sql = "SELECT room_id FROM room WHERE room_id = '$post_room_id'";
             $select = $conn->query($sql);
             if ($select->num_rows > 0) {
-                $sql = "UPDATE users SET name='$post_name' WHERE user_id='$post_user_id'";
+                $sql = "UPDATE room SET name='$post_name' WHERE room_id='$post_room_id'";
 
                 if ($conn->query($sql) === TRUE) {
                     $data = array(
                         "result" => 1,
-                        "user_id" => $post_user_id,
+                        "room_id" => $post_room_id,
                         "name" => $post_name
                     );
                     echo json_encode($data);
@@ -110,13 +93,13 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             echo json_encode($data);
         }
     } else if ($_POST['request'] == "remove") {
-        if (isset($_POST['user_id']) && $_POST['user_id'] != "") {
-            $post_user_id = $_POST['user_id'];
-            $sql = "SELECT user_id FROM users WHERE user_id = '$post_user_id'";
+        if (isset($_POST['room_id']) && $_POST['room_id'] != "") {
+            $post_room_id = $_POST['room_id'];
+            $sql = "SELECT room_id FROM room WHERE room_id = '$post_room_id'";
             $select = $conn->query($sql);
 
             if ($select->num_rows > 0) {
-                $sql = "DELETE FROM users WHERE user_id='$post_user_id'";
+                $sql = "DELETE FROM room WHERE room_id='$post_room_id'";
                 if ($conn->query($sql) === TRUE) {
                     $data = array(
                         "result" => 1,
@@ -145,7 +128,8 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             echo json_encode($data);
         }
     } else if ($_POST['request'] == "get") {
-        $sql = "SELECT * FROM users";
+
+        $sql = "SELECT * FROM room";
         $select = $conn->query($sql);
         
         if ($select->num_rows > 0) {
@@ -165,10 +149,10 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             echo json_encode($data);
         }
     } else if ($_POST['request'] == "get_id") {
-        if (isset($_POST['user_id']) && $_POST['user_id'] != "") {
-            $post_user_id = $_POST['user_id'];
+        if (isset($_POST['room_id']) && $_POST['room_id'] != "") {
+            $post_room_id = $_POST['room_id'];
 
-            $sql = "SELECT * FROM users WHERE user_id = '$post_user_id'";
+            $sql = "SELECT * FROM room WHERE room_id = '$post_room_id'";
             $select = $conn->query($sql);
 
             if ($select->num_rows > 0) {
@@ -183,11 +167,10 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             } else {
                 $data = array(
                     "result" => 0,
-                    "message" => "Id user invalid"
+                    "message" => "Id room invalid"
                 );
                 echo json_encode($data);
             }
-
         } else {
             $data = array(
                 "result" => 0,
