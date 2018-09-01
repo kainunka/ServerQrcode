@@ -110,8 +110,16 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             $sql = "SELECT course_id FROM course WHERE course_id = '$post_course_id'";
             $select = $conn->query($sql);
 
+            $sql2 = "SELECT join_id FROM join_room WHERE course_id = '$post_course_id'";
+            $select2 = $conn->query($sql2);
+
             if ($select->num_rows > 0) {
-                $sql = "DELETE FROM course WHERE course_id='$post_course_id'";
+                if ($select2->num_rows > 0) {
+                    $sql = "DELETE course, join_room FROM course, join_room WHERE course.course_id = '$post_course_id' AND course.course_id = join_room.course_id";
+                } else {
+                    $sql = "DELETE FROM course WHERE course_id='$post_course_id'";
+                }
+
                 if ($conn->query($sql) === TRUE) {
                     $data = array(
                         "result" => 1,
