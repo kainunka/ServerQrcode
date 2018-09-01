@@ -189,30 +189,51 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             if ($select->num_rows > 0) {
                 $row = $select->fetch_assoc();
 
-                $sql_insert = "INSERT INTO join_room (course_id, user_id, time, name, start_time, end_time)
-                VALUES ('$post_course_id', '$post_user_id', '$post_time', '".$row['name']."', '".$row['start_time']."', '".$row['end_time']."')";
-
-                if ($conn->query($sql_insert) === TRUE) {
-                    $last_id = $conn->insert_id;
-                   
+                if ($row['end_time'] < $post_time) {
                     $data = array(
-                        "result" => 1,
-                        "join_id" => $last_id,
-                        "course_id" => $post_course_id,
-                        "user_id" => $post_user_id,
-                        "time" => $post_time,
-                        "name" => $row['name'],
-                        "start_time" => $row['start_time'],
-                        "end_time" => $row['end_time']
+                        "result" => 0,
+                        "status" => "ไม่สามารถเข้าร่วมได้เนื่องจาก เลยเวลาแล้ว",
+                        "message" => "Can not join room"
                     );
                     echo json_encode($data);
                 } else {
-                    $data = array(
-                        "result" => 0,
-                        "message" => "Insert error"
-                    );
-                    echo json_encode($data);
+
+                    if ($row['start_time'] > $post_time) {
+                        $data = array(
+                            "result" => 0,
+                            "status" => "ไม่สามารถเข้าร่วมได้เนื่องจาก ยังไม่ถึงเวลา",
+                            "message" => "Can not join room"
+                        );
+                        echo json_encode($data);
+                    } else {
+                        $sql_insert = "INSERT INTO join_room (course_id, user_id, time, name, start_time, end_time)
+                        VALUES ('$post_course_id', '$post_user_id', '$post_time', '".$row['name']."', '".$row['start_time']."', '".$row['end_time']."')";
+
+                        if ($conn->query($sql_insert) === TRUE) {
+                            $last_id = $conn->insert_id;
+                        
+                            $data = array(
+                                "result" => 1,
+                                "join_id" => $last_id,
+                                "course_id" => $post_course_id,
+                                "user_id" => $post_user_id,
+                                "time" => $post_time,
+                                "name" => $row['name'],
+                                "start_time" => $row['start_time'],
+                                "end_time" => $row['end_time']
+                            );
+                            echo json_encode($data);
+                        } else {
+                            $data = array(
+                                "result" => 0,
+                                "message" => "Insert error"
+                            );
+                            echo json_encode($data);
+                        }
+                    }
                 }
+
+                
             } else {
                 $data = array(
                     "result" => 0,

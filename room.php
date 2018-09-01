@@ -106,8 +106,16 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
             $sql = "SELECT room_id FROM room WHERE room_id = '$post_room_id'";
             $select = $conn->query($sql);
 
+            $sql2 = "SELECT course_id FROM course WHERE room_id = '$post_room_id'";
+            $select2 = $conn->query($sql2);
+
             if ($select->num_rows > 0) {
-                $sql = "DELETE FROM room WHERE room_id='$post_room_id'";
+                if ($select2->num_rows > 0) {
+                    $sql = "DELETE room, course  FROM room, course WHERE room.room_id='$post_room_id' AND room.room_id = course.room_id;";
+                } else {
+                    $sql = "DELETE FROM room WHERE room_id='$post_room_id'";
+                }
+               
                 if ($conn->query($sql) === TRUE) {
                     $data = array(
                         "result" => 1,
