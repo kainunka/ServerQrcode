@@ -9,9 +9,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 // user server
 $servername = "localhost";
-$username = "id6911739_qrcodeapp";
 $password = "123456789";
 $dbname = "id6911739_qrcode";
+$username = "root";
+$dbname = "qrcode";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 mysqli_set_charset($conn, "utf8");
