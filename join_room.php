@@ -19,7 +19,7 @@ mysqli_set_charset($conn, "utf8");
 $data = array(
     "result" => 0
 );
-$request_array = array("add", "remove", "get", "get_id", "course_add", "get_user");
+$request_array = array("add", "remove", "get", "get_id", "get_course", "course_add", "get_user");
 //
 
 if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
@@ -139,6 +139,37 @@ if (isset($_POST['request']) && in_array($_POST['request'], $request_array)) {
                 $data = array(
                     "result" => 0,
                     "message" => "Id join room invalid"
+                );
+                echo json_encode($data);
+            }
+        } else {
+            $data = array(
+                "result" => 0,
+                "message" => "Parameter invalid"
+            );
+            echo json_encode($data);
+        }
+    } else if ($_POST['request'] == "get_course") {
+        if (isset($_POST['course_id']) && $_POST['course_id'] != "") {
+            $post_course_id = $_POST['course_id'];
+
+            $sql = "SELECT * FROM join_room WHERE course_id = '$post_course_id'";
+            $select = $conn->query($sql);
+
+            if ($select->num_rows > 0) {
+                $data = array();
+                while($row = $select->fetch_assoc()) {
+                    $data[] = $row;
+                }
+                
+                echo json_encode(array(
+                    "result" => 1,
+                    "data" => $data
+                ));
+            } else {
+                $data = array(
+                    "result" => 0,
+                    "message" => "Id course room invalid"
                 );
                 echo json_encode($data);
             }
